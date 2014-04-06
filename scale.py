@@ -2,10 +2,28 @@
 # -*- coding: utf-8 -*-
 # vim: set fileencoding=utf-8 :
 import usb.util
+from collections import namedtuple
 from scale_manager import ScaleManager
 
-POUNDS = "lb"
-KILOS = "kg"
+WEIGHT_UNITS = {
+    0x1: "milligram",
+    0x2: "gram",
+    0x3: "kilogram",
+    0x4: "carat",
+    0x5: "tael",
+    0x6: "grain",
+    0x7: "pennyweight",
+    0x8: "metric ton",
+    0x9: "avoir ton",
+    0xA: "troy ounce",
+    0xB: "ounce",
+    0xC: "pound",
+    0xD: "reserved (0xD)",
+    0xE: "reserved (0xE)",
+    0xF: "reserved (0xF)"
+}
+
+ScaleReading = namedtuple("ScaleReading", ["weight", "unit"])
 
 class Scale(object):
     """Represents a USB-connected scale."""
@@ -57,6 +75,7 @@ class Scale(object):
         self._manufacturer = manufacturer
         self._manager = device_manager
         self._endpoint = None
+        self._last_reading = None
 
         # Initialize the USB connection to the scale.
         if self.device:
@@ -114,9 +133,9 @@ class Scale(object):
 
         return True
 
-    def read(self, unit=POUNDS, endpoint=None):
-        """Takes a reading from the scale and returns a float."""
-        if not self.device or (unit != POUNDS and unit != KILOS):
+    def read(self, endpoint=None):
+        """Takes a reading from the scale and returns a ScaleReading."""
+        if not self.device:
             return False
 
         data = None
@@ -142,12 +161,10 @@ class Scale(object):
         if error and not data:
             raise error
 
-        weight = data[4] + (256 * data[5])
-
-        if unit == POUNDS:
-            weight = round(weight*0.01, 2)
-
-        return weight
+        return ScaleReading(
+            weight=round(0.01*(data[4] + (256 * data[5])), 2),
+            unit=WEIGHT_UNITS[data[2]]
+        )
 
 
     ### Private methods ###

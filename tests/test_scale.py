@@ -1,7 +1,10 @@
 import unittest
 import mocks
 from scale_manager import ScaleManager
-from scale import Scale
+from scale import Scale, WEIGHT_UNITS
+
+KILOS = WEIGHT_UNITS[0x3]
+POUNDS = WEIGHT_UNITS[0xC]
 
 class TestScale(unittest.TestCase):
     def setUp(self):
@@ -66,14 +69,34 @@ class TestScale(unittest.TestCase):
         )
         self.assertEqual(scale.device, None)
 
-    def test_read_0_oz(self):
-        """Make sure the scale properly reads zero ounces."""
+    def test_read_0_lb(self):
+        """Make sure the scale properly reads zero pounds."""
         with Scale(device_manager=self.manager) as scale:
             scale.device.set_weight("0 lb")
-            self.assertEqual(scale.read(endpoint=self.endpoint), 0)
+            reading = scale.read(endpoint=self.endpoint)
+            self.assertEqual(reading.weight, 0)
+            self.assertEqual(reading.unit, POUNDS)
 
-    def test_read_81_oz(self):
+    def test_read_5_lb(self):
         """Make sure the scale properly reads zero ounces."""
         with Scale(device_manager=self.manager) as scale:
             scale.device.set_weight("5.10 lb")
-            self.assertEqual(scale.read(endpoint=self.endpoint), 5.10)
+            reading = scale.read(endpoint=self.endpoint)
+            self.assertEqual(reading.weight, 5.10)
+            self.assertEqual(reading.unit, POUNDS)
+
+    def test_read_0_kg(self):
+        """Make sure the scale properly reads zero kilos."""
+        with Scale(device_manager=self.manager) as scale:
+            scale.device.set_weight("0 kg")
+            reading = scale.read(endpoint=self.endpoint)
+            self.assertEqual(reading.weight, 0)
+            self.assertEqual(reading.unit, KILOS)
+
+    def test_read_2_kg(self):
+        """Make sure the scale properly reads 1.94 kilograms."""
+        with Scale(device_manager=self.manager) as scale:
+            scale.device.set_weight("1.94 kg")
+            reading = scale.read(endpoint=self.endpoint)
+            self.assertEqual(reading.weight, 1.94)
+            self.assertEqual(reading.unit, KILOS)

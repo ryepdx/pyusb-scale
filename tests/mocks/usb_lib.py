@@ -21,7 +21,9 @@ class MockDevice(object):
         # Actual output recorded from a Mettler Toledo PS60.
         self._weights = {
             "0 lb": array('B', [3, 2, 12, 254, 0, 0]),
-            "5.10 lb": array('B', [3, 4, 12, 254, 254, 1])
+            "5.10 lb": array('B', [3, 4, 12, 254, 254, 1]),
+            "0 kg": array('B', [3, 2, 3, 254, 0, 0]),
+            "1.94 kg": array('B', [3, 4, 3, 254, 194, 0])
         }
         self._weight = "0 lb"
         self._readied = False
