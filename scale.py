@@ -4,24 +4,8 @@
 import usb.util
 from collections import namedtuple
 from scale_manager import ScaleManager
-
-WEIGHT_UNITS = {
-    0x1: "milligram",
-    0x2: "gram",
-    0x3: "kilogram",
-    0x4: "carat",
-    0x5: "tael",
-    0x6: "grain",
-    0x7: "pennyweight",
-    0x8: "metric ton",
-    0x9: "avoir ton",
-    0xA: "troy ounce",
-    0xB: "ounce",
-    0xC: "pound",
-    0xD: "reserved (0xD)",
-    0xE: "reserved (0xE)",
-    0xF: "reserved (0xF)"
-}
+from reports import \
+        ReportFactory, STATUSES, ZERO_WEIGHT, STABLE_WEIGHT, DATA_REPORT
 
 ScaleReading = namedtuple("ScaleReading", ["weight", "unit"])
 
@@ -133,8 +117,26 @@ class Scale(object):
 
         return True
 
-    def read(self, endpoint=None):
-        """Takes a reading from the scale and returns a ScaleReading."""
+    def weigh(self, endpoint=None, max_attempts=10):
+        """Reads from the scale until a stable weight is found"""
+        weighed = False
+        attempts = 0
+        
+        while not weighed and attempts < max_attempts:
+            attempts += 1
+            report = self.read(endpoint=endpoint)
+            weighed = (report.type == DATA_REPORT and (
+                report.status == STATUSES[STABLE_WEIGHT]
+                or report.status == STATUSES[ZERO_WEIGHT]
+            ))
+
+        if not weighed:
+            report = None
+
+        return report
+
+    def read(self, endpoint=None, max_attempts=10):
+        """Takes a reading from the scale and returns a named tuple"""
         if not self.device:
             return False
 
@@ -148,8 +150,8 @@ class Scale(object):
         # Weighing data consists of a six-element array.
         # In between reads, it returns a two-element array to
         # demonstrate readiness. We can ignore those.
-        while (data is None or len(data) < 6) and attempts < 10:
-            attempts+=1
+        while data is None and attempts < max_attempts:
+            attempts += 1
             try:
                 data = self.device.read(
                     endpoint.bEndpointAddress,
@@ -161,10 +163,7 @@ class Scale(object):
         if error and not data:
             raise error
 
-        return ScaleReading(
-            weight=round(0.01*(data[4] + (256 * data[5])), 2),
-            unit=WEIGHT_UNITS[data[2]]
-        )
+        return ReportFactory.build(data)
 
 
     ### Private methods ###

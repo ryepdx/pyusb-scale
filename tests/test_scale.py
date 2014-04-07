@@ -1,7 +1,8 @@
 import unittest
 import mocks
 from scale_manager import ScaleManager
-from scale import Scale, WEIGHT_UNITS
+from scale import Scale
+from reports import WEIGHT_UNITS
 
 KILOS = WEIGHT_UNITS[0x3]
 POUNDS = WEIGHT_UNITS[0xC]
@@ -69,34 +70,34 @@ class TestScale(unittest.TestCase):
         )
         self.assertEqual(scale.device, None)
 
-    def test_read_0_lb(self):
-        """Make sure the scale properly reads zero pounds."""
+    def test_weigh_0_lb(self):
+        """Make sure the scale properly weighs zero pounds."""
         with Scale(device_manager=self.manager) as scale:
             scale.device.set_weight("0 lb")
-            reading = scale.read(endpoint=self.endpoint)
-            self.assertEqual(reading.weight, 0)
-            self.assertEqual(reading.unit, POUNDS)
+            weighing = scale.weigh(endpoint=self.endpoint)
+            self.assertEqual(weighing.weight, 0)
+            self.assertEqual(weighing.unit, POUNDS)
 
-    def test_read_5_lb(self):
-        """Make sure the scale properly reads zero ounces."""
+    def test_weigh_5_lb(self):
+        """Make sure the scale properly weighs zero ounces."""
         with Scale(device_manager=self.manager) as scale:
             scale.device.set_weight("5.10 lb")
-            reading = scale.read(endpoint=self.endpoint)
-            self.assertEqual(reading.weight, 5.10)
-            self.assertEqual(reading.unit, POUNDS)
+            weighing = scale.weigh(endpoint=self.endpoint)
+            self.assertEqual(weighing.weight, 5.10)
+            self.assertEqual(weighing.unit, POUNDS)
 
-    def test_read_0_kg(self):
-        """Make sure the scale properly reads zero kilos."""
+    def test_weigh_0_kg(self):
+        """Make sure the scale properly weighs zero kilos."""
         with Scale(device_manager=self.manager) as scale:
             scale.device.set_weight("0 kg")
-            reading = scale.read(endpoint=self.endpoint)
-            self.assertEqual(reading.weight, 0)
-            self.assertEqual(reading.unit, KILOS)
+            weighing = scale.weigh(endpoint=self.endpoint)
+            self.assertEqual(weighing.weight, 0)
+            self.assertEqual(weighing.unit, KILOS)
 
-    def test_read_2_kg(self):
-        """Make sure the scale properly reads 1.94 kilograms."""
+    def test_weigh_2_kg(self):
+        """Make sure the scale properly weighs 1.94 kilograms."""
         with Scale(device_manager=self.manager) as scale:
             scale.device.set_weight("1.94 kg")
-            reading = scale.read(endpoint=self.endpoint)
-            self.assertEqual(reading.weight, 1.94)
-            self.assertEqual(reading.unit, KILOS)
+            weighing = scale.weigh(endpoint=self.endpoint)
+            self.assertEqual(weighing.weight, 1.94)
+            self.assertEqual(weighing.unit, KILOS)
