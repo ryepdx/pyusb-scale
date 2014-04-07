@@ -48,10 +48,10 @@ class Scale(object):
 
         device = device_manager.find(manufacturer=manufacturer, model=model)
 
-        if not manufacturer:
+        if not manufacturer and device:
             manufacturer = device_manager.get_manufacturer(device)
 
-        if not model:
+        if not model and device:
             model = device_manager.get_model(device)
 
         self._device = device
