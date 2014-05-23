@@ -9,6 +9,9 @@ from reports import \
 
 ScaleReading = namedtuple("ScaleReading", ["weight", "unit"])
 
+class ConnectionError(Exception):
+    pass
+
 class Scale(object):
     """Represents a USB-connected scale."""
 
@@ -125,6 +128,10 @@ class Scale(object):
         while not weighed and attempts < max_attempts:
             attempts += 1
             report = self.read(endpoint=endpoint)
+
+            if not report:
+                raise ConnectionError("Scale not found!")
+
             weighed = (report.type == DATA_REPORT and (
                 report.status == STATUSES[STABLE_WEIGHT]
                 or report.status == STATUSES[ZERO_WEIGHT]
