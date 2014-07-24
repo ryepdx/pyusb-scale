@@ -163,7 +163,7 @@ class Scale(object):
         # Weighing data consists of a six-element array.
         # In between reads, it returns a two-element array to
         # demonstrate readiness. We can ignore those.
-        while data is None and attempts < max_attempts:
+        while not data and attempts < max_attempts:
             attempts += 1
             try:
                 data = self.device.read(
