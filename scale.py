@@ -100,9 +100,12 @@ class Scale(object):
 
         self._reattach = False
         
-        if self.device.is_kernel_driver_active(0):
-            self._reattach = True
-            self.device.detach_kernel_driver(0)
+        try:
+            if self.device.is_kernel_driver_active(0):
+                self._reattach = True
+                self.device.detach_kernel_driver(0)
+        except NotImplementedError:
+            pass # libusb-win32 does not implement `is_kernel_driver_active`
 
         self.device.set_configuration()
 
@@ -115,8 +118,11 @@ class Scale(object):
 
         usb.util.dispose_resources(self.device)
 
-        if self._reattach:
-            self.device.attach_kernel_driver(0)
+        try:
+            if self._reattach:
+                self.device.attach_kernel_driver(0)
+        except NotImplementedError:
+            pass # libusb-win32 does not implement `is_kernel_driver_active`
 
         return True
 
