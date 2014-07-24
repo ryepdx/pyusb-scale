@@ -124,7 +124,7 @@ class ReportFactory(object):
     @staticmethod
     def twos_comp(value):
         """Compute the 2's compliment of int value val"""
-        num_bits = len(bin(value)) - 2
+        num_bits = len(bin(value)) - 2 # Subtract 2 to remove leading '0b'
         if((value & (1 << (num_bits - 1))) != 0):
             value = value - (1 << num_bits)
         return value
