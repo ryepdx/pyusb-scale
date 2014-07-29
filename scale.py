@@ -116,6 +116,7 @@ class Scale(object):
         if not self.device:
             return False
 
+        self._device.reset()
         usb.util.dispose_resources(self.device)
 
         try:
